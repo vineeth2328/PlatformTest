@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: explorer
+  labels:
+    app: explorer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: explorer
+  template:
+    metadata:
+      labels:
+        app: explorer
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+        #mapping Wallet from vault to explorer
+      {{- range .Values.apps.explorer.connectionProfiles }}
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_client.id: "/opt/explorer/wallet/{{ .networkName}}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_client.id: "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/wallet"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_client.id: |
+          {{`{{ with secret "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/wallet"}}
+          {{ range $key, $value := .Data.data }}
+          {{$value}}
+          {{end}}
+          {{ end }}`}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_client.id: | 
+          /bin/sh -c "awk NF /opt/explorer/wallet/{{ .networkName}}/{{ .networkName}}_client.id >  /opt/explorer/wallet/{{ .networkName}}/{{ .userID}}.id"
+      
+        #mapping Orderer ca certificate from vault to explorer
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_orderer.crt : "{{ .ordererCAPath }}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_orderer.crt: "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/orderer"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_orderer.crt: | 
+          {{`{{ with secret "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/orderer"}}
+          {{ range $key, $value := .Data.data }}
+          {{$value}}
+          {{end}}
+          {{ end }}`}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_orderer.crt: |  
+          /bin/sh -c "awk NF {{ .ordererCAPath }}/{{ .networkName}}_orderer.crt >  {{ .ordererCAPath }}/ca.crt"
+          
+        #mapping Peer ca certificate from vault to explorer
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_peer.crt : "{{ .peerCAPath }}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_peer.crt: "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/peerOrg"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_peer.crt: | 
+          {{`{{ with secret "wbp/platform/dev/wbp_demo_network/components/explorer/fabric/peerOrg"}}
+          {{ range $key, $value := .Data.data }}
+          {{$value}}
+          {{end}}
+          {{ end }} `}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_peer.crt: |  
+          /bin/sh -c "awk NF {{ .peerCAPath }}/{{ .networkName}}_peer.crt >  {{ .peerCAPath }}/ca.crt"
+      {{- end }}
+        vault.hashicorp.com/role: {{ .Values.apps.explorer.vaultRole | quote}}
+
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+        - name: explorer
+          image: {{ .Values.apps.explorer.repository }}:{{ .Values.apps.explorer.tag }}
+          env:
+          {{- range .Values.apps.explorer.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote}}
+          {{- end }}
+          {{- range .Values.apps.explorer_db.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote}}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /opt/explorer/app/platform/fabric/connection-profile
+              name: connection-profile
+            - mountPath: /opt/explorer/app/platform/fabric/config.json
+              name: config
+              subPath: config.json
+            - name: cp
+              mountPath: /opt/explorer/app/platform/fabric/crypto-config
+              subPath: crypto-config
+          command: ["sh", "-c", "node /opt/explorer/main.js && tail -f /dev/null"]
+      volumes:
+        - name: cp
+          persistentVolumeClaim:
+            claimName: connection-profile
+        - name: config
+          configMap:
+              defaultMode: 420
+              name: explorer-connection
+              items:
+                - key: config.json
+                  path: config.json
+        - name: connection-profile
+          configMap:
+              defaultMode: 420
+              name: explorer-connection
+              items:
+              {{- range .Values.apps.explorer.connectionProfiles }}
+                - key: {{ .profileFileName }}
+                  path: {{ .profileFileName }}
+              {{- end }}

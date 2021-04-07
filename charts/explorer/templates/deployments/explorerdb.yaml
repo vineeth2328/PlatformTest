@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: explorer-db
+  labels:
+    app: explorer-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: explorer-db
+  template:
+    metadata:
+      labels:
+        app: explorer-db
+    spec:
+      containers:
+        - name: explorer-db
+          image: {{ .Values.apps.explorer_db.repository }}:{{ .Values.apps.explorer_db.tag }}
+          env:
+          {{- range .Values.apps.explorer_db.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote}}
+          {{- end }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+              subPath: pgdata
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: explorer-db
