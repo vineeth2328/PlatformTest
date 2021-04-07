@@ -1,7 +1,7 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: hlf-rest-client-release
+  name: master
   namespace: wbp-platform
   annotations:
     fluxcd.io/automated: "true"
@@ -11,6 +11,6 @@ spec:
   chart:
     git: git@github.com:blockchain-wmt/PlatformTest.git
     path: charts/hlf-rest-client
-    ref: hlf-rest-client-release
+    ref: master
   values:
     replicaCount: 3
