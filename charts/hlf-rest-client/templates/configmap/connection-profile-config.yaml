@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: connection-profile-config
+data:
+  config.json: |-
+    {
+      "network-configs": {
+        "arun-carrier-network": {
+          "name": "arun-carrier-network",
+          "profile": "./connection-profile/wbp-network.json"
+        }
+      }
+    }
+  application.yml: |-
+    spring:
+      profiles: container
+      devtools.add-properties: false
+    fabric:
+      localhostReportAddress: true
+      wallet:
+        path: /usr/local/config/wallet
+        adminUser:
+          name: admin
+        clientUser:
+          name: clientUser
+      orgConnectionConfig:
+        path: /usr/local/config
+        filename: connection-walmart.yaml
+      client:
+        rest:
+          apikey: QVvDBO9rizgQ47dsuBKwdm1qmtIbwGSQejIshM4KTk
+  wbp-network.json: |-
+    {
+      "name": "arun-carrier-network",
+      "version": "1.0.0",
+      "client": {
+        "tlsEnable": true,
+        "adminCredential": {
+          "id": "exploreradmin",
+          "password": "password"
+        },
+        "enableAuthentication": true,
+        "organization": "arun-carrier",
+        "connection": {
+          "timeout": {
+            "peer": {
+              "endorser": "300"
+            },
+            "orderer": "300"
+          }
+        }
+      },
+      "channels": {
+        "channelone": {
+          "peers": {
+            "peer0.arun-carrier": {},
+            "peer1.arun-carrier": {}
+          },
+          "connection": {
+            "timeout": {
+              "peer": {
+                "endorser": "6000",
+                "eventHub": "6000",
+                "eventReg": "6000"
+              }
+            }
+          }
+        }
+      },
+      "organizations": {
+        "arun-carrier": {
+          "mspid": "ksupplierMSP",
+          "peers": [
+            "peer0.arun-carrier",
+            "peer1.arun-carrier"
+          ]
+        },
+        "arun-walmart": {
+          "mspid": "arun-walmartMSP",
+          "orderers": [
+            "orderer1.arun-walmart",
+            "orderer2.arun-walmart",
+            "orderer3.arun-walmart"
+          ]
+        }
+      },
+      "peers": {
+        "peer0.arun-carrier": {
+          "grpcOptions": {
+            "hostnameOverride": "peer0.ksupplier-net.peer.karthik.pvt.wmtbaf.info",
+            "ssl-target-name-override": "peer0.ksupplier-net.peer.karthik.pvt.wmtbaf.info"
+          },
+          "tlsCACerts": {
+            "path": "/opt/explorer/app/platform/fabric/crypto-config/peerOrganizations/arun-carrier/tls/ca.crt"
+          },
+          "url": "grpcs://peer0.ksupplier-net.peer.karthik.pvt.wmtbaf.info:8443"
+        },
+        "peer1.arun-carrier": {
+          "grpcOptions": {
+            "hostnameOverride": "peer1.ksupplier-net.peer.karthik.pvt.wmtbaf.info",
+            "ssl-target-name-override": "peer1.ksupplier-net.peer.karthik.pvt.wmtbaf.info"
+          },
+          "tlsCACerts": {
+            "path": "/opt/explorer/app/platform/fabric/crypto-config/peerOrganizations/arun-carrier/tls/ca.crt"
+          },
+          "url": "grpcs://peer1.ksupplier-net.peer.karthik.pvt.wmtbaf.info:8443"
+        }
+      },
+      "orderers": {
+        "orderer1.arun-walmart": {
+          "grpcOptions": {
+            "hostnameOverride": "orderer1.orderer.karthik.pvt.wmtbaf.info",
+            "ssl-target-name-override": "orderer1.orderer.karthik.pvt.wmtbaf.info"
+          },
+          "tlsCACerts": {
+            "path": "/opt/explorer/app/platform/fabric/crypto-config/ordererOrganizations/arun-walmart/tls/ca.crt"
+          },
+          "url": "grpcs://orderer1.orderer.karthik.pvt.wmtbaf.info:8443"
+        },
+        "orderer2.arun-walmart": {
+          "grpcOptions": {
+            "hostnameOverride": "orderer2.orderer.karthik.pvt.wmtbaf.info",
+            "ssl-target-name-override": "orderer2.orderer.karthik.pvt.wmtbaf.info"
+          },
+          "tlsCACerts": {
+            "path": "/opt/explorer/app/platform/fabric/crypto-config/ordererOrganizations/arun-walmart/tls/ca.crt"
+          },
+          "url": "grpcs://orderer2.orderer.karthik.pvt.wmtbaf.info:8443"
+        },
+        "orderer3.arun-walmart": {
+          "grpcOptions": {
+            "hostnameOverride": "orderer3.orderer.karthik.pvt.wmtbaf.info",
+            "ssl-target-name-override": "orderer3.orderer.karthik.pvt.wmtbaf.info"
+          },
+          "tlsCACerts": {
+            "path": "/opt/explorer/app/platform/fabric/crypto-config/ordererOrganizations/arun-walmart/tls/ca.crt"
+          },
+          "url": "grpcs://orderer3.orderer.karthik.pvt.wmtbaf.info:8443"
+        }
+      }
+    }

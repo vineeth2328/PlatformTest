@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "hlf-rest-client.fullname" . }}
+  labels:
+    {{- include "hlf-rest-client.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "hlf-rest-client.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "hlf-rest-client.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "hlf-rest-client.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      volumes:
+        - name: connection-profile-volume
+          configMap:
+            name: connection-profile-config
+            defaultMode: 0744
+        - name: config-data
+          emptyDir:
+            medium: Memory
+
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - name: connection-profile-volume
+              mountPath: /usr/local/config/
+          env:
+            - name: fabric_localhostReportAddress
+              value: "false"
+            - name: fabric_orgConnectionConfig_filename
+              value: connection-walmart.yaml
+            - name: fabric_wallet_clientUser_name
+              value:  clientUser
+            - name: spring_profiles_active
+              value:  container
+#      initContainers:
+#        - name:  setup-config
+#          image: busybox
+#          imagePullPolicy: "IfNotPresent"
+#          command:
+#            - sh
+#            - "-c"
+#            - |
+#              ls /usr/local/config
+#          volumeMounts:
+#            - name: connection-profile-volume
+#              mountPath: /usr/local/config
+
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
