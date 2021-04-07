@@ -1,0 +1,25 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: explorer
+  namespace: explorer
+spec:
+  releaseName: explorer-rc
+  chart:
+    git: git@github.com:blockchain-wmt/PlatformTest
+    path: charts/explorer
+    ref: master
+  values:
+    serviceAccount:
+      name: "explorerappsa"
+    apps:
+      explorer:
+        repository: hyperledger/explorer
+        tag: "1.1.2"
+        vaultRole: explorerapp
+        connectionProfiles:
+          - networkName: wbp_demo_network
+            environment: dev
+            ordererCAPath: /opt/explorer/app/platform/fabric/crypto-config/ordererOrganizations/arun-walmart/tls
+            peerCAPath: /opt/explorer/app/platform/fabric/crypto-config/peerOrganizations/arun-carrier/tls
+            userID: exploreradmin
