@@ -32,13 +32,13 @@ podAnnotations:
     vault.hashicorp.com/agent-inject-template-users.txt: |
       {{ with secret "config/users"}}
       {{ range $key, $value := .Data.data }}
-      {{$key}}={{$value}}
+      {{$key}}|{{$value}}
       {{end}}
       {{ end }}
     vault.hashicorp.com/agent-inject-command-users.txt: |
-      /bin/sh -c "awk NF /usr/local/config/wallet/users.txt | while IFS= read -r line;
+      #!/bin/bash "awk NF /usr/local/config/wallet/users.txt | while IFS= read -r line;
                    do
-                    IFS='='
+                    IFS='|'
                     echo $line
                     array=(${line// / })
                     #read -a array <<< "$line"
