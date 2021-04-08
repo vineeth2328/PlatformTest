@@ -27,14 +27,17 @@ serviceAccount:
 podAnnotations:
     vault.hashicorp.com/agent-inject: "true"
     vault.hashicorp.com/agent-inject-status: "update"
-    vault.hashicorp.com/secret-volume-path-admin.id: "/usr/local/config/wallet"
-    vault.hashicorp.com/agent-inject-secret-admin.id: "config/users"
-    vault.hashicorp.com/agent-inject-template-admin.id: |
+    vault.hashicorp.com/secret-volume-path-users.txt: "/usr/local/config/wallet"
+    vault.hashicorp.com/agent-inject-secret-users.txt: "config/users"
+    vault.hashicorp.com/agent-inject-template-users.txt: |
       {{ with secret "config/users"}}
       {{ range $key, $value := .Data.data }}
-      {{$value}}
+      {{$key}}|{{$value}}
       {{end}}
       {{ end }}
+#    vault.hashicorp.com/agent-inject-command-users.txt: |
+#      /bin/sh -c "awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done"
+    vault.hashicorp.com/agent-inject-command-users.txt: {{ ( print "sh -c awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done" ) }}
     vault.hashicorp.com/role: "hlfapp"
 podSecurityContext: {}
   # fsGroup: 2000
@@ -98,15 +101,15 @@ env:
     value:  clientUser
   - name: spring_profiles_active
     value:  container
-initContainers:
-  setup-config:
-    image: busybox
-    volumeMounts:
-      - name: connection-profile-volume
-        mountPath: /usr/local/config/
-    command:
-      - sh
-      - "-c"
-      - |
-        ls /usr/local/config
+#initContainers:
+#  setup-config:
+#    image: busybox
+#    volumeMounts:
+#      - name: connection-profile-volume
+#        mountPath: /usr/local/config/
+#    command:
+#      - sh
+#      - "-c"
+#      - |
+#        ls /usr/local/config
 

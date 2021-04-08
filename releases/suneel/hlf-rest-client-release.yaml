@@ -1,7 +1,7 @@
 apiVersion: helm.fluxcd.io/v1
 kind: HelmRelease
 metadata:
-  name: master
+  name: hlf-rest-client
   namespace: wbp-platform
   annotations:
     fluxcd.io/automated: "true"
