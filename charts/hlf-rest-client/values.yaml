@@ -36,7 +36,7 @@ podAnnotations:
       {{end}}
       {{ end }}
     vault.hashicorp.com/agent-inject-command-users.txt: |
-        #!/bin/bash "awk NF /usr/local/config/wallet/users.txt>/usr/local/config/wallet/users1.txt"
+      /bin/sh -c "awk NF /usr/local/config/wallet/users.txt > /usr/local/config/wallet/users1.txt"
     vault.hashicorp.com/role: "hlfapp"
 podSecurityContext: {}
   # fsGroup: 2000
