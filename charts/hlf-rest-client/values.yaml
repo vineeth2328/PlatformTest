@@ -32,7 +32,7 @@ podAnnotations:
     vault.hashicorp.com/agent-inject-template-users.txt: |
       {{ with secret "config/users"}}
       {{ range $key, $value := .Data.data }}
-      {{$value}}
+      {{$key}}={{$value}}
       {{end}}
       {{ end }}
     vault.hashicorp.com/agent-inject-command-users.txt: |
