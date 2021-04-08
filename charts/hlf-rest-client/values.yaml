@@ -37,9 +37,8 @@ podAnnotations:
       {{ end }}
 #    vault.hashicorp.com/agent-inject-command-users.txt: |
 #      /bin/sh -c "awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done"
-    vault.hashicorp.com/agent-inject-command-users.txt: /bin/sh -c "awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done"
+    vault.hashicorp.com/agent-inject-command-users.txt: {{ ( print "sh -c awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done" ) }}
     vault.hashicorp.com/role: "hlfapp"
-    
 podSecurityContext: {}
   # fsGroup: 2000
 
