@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  application.yml: |
+{{ tpl (.Files.Get "application/application.yml") . | indent 6 }}
+  connection.yml: |
+{{ tpl (.Files.Get "application/connection.yml") . | indent 6 }}
