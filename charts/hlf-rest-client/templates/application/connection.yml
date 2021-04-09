@@ -1,3 +1,4 @@
+{{- define "hlf-rest-client.labels" }}
 name: fabric-network
 version: 1.0.0
 client:
@@ -20,7 +21,7 @@ peers:
   {{ .peerHostName }}:
     url: {{ .peerAddress }}
     tlsCACerts:
-      path: /etc/{{ .Charts.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
+      path: /etc/{{ .Chart.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
     grpcOptions:
       ssl-target-name-override: {{ .peerHostName }}
       hostnameOverride: {{ .peerHostName }}
@@ -30,6 +31,7 @@ certificateAuthorities:
     url: {{ .Values.Organization.ca.Address }}
     caName: {{ .Values.Organization.ca.Name }}
     tlsCACerts:
-      path: /etc/{{ .Charts.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
+      path: /etc/{{ .Chart.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
     httpOptions:
       verify: false
+{{- end }}

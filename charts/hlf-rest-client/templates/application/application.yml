@@ -1,14 +1,15 @@
+{{- define "hlf-rest-client.labels" }}
 spring:
   profiles.active: k8s
 Kafka:
   integration:
-    jaasConfigFile: file:/etc/{{ .Charts.Name }}/secrets/vault-intg.properties
+    jaasConfigFile: file:/etc/{{ .Chart.Name }}/secrets/vault-intg.properties
   eventListener:
-    jaasConfigFile: file:/etc/{{ .Charts.Name }}/secrets/vault-event.properties
+    jaasConfigFile: file:/etc/{{ .Chart.Name }}/secrets/vault-event.properties
 fabric:
   client:
     rest:
-      apikeyFile: file:/etc/{{ .Charts.Name }}/secrets/vault-apikey.properties
+      apikeyFile: file:/etc/{{ .Chart.Name }}/secrets/vault-apikey.properties
 springdoc:
   version: 1.0.0
   swagger-ui:
@@ -47,13 +48,13 @@ spring:
 fabric:
   localhostReportAddress: true
   wallet:
-    path: /etc/{{ .Charts.Name }}/secrets/
+    path: /etc/{{ .Chart.Name }}/secrets/
     adminUser:
       name: admin
     clientUser:
       name: clientUser
   orgConnectionConfig:
-    path: /usr/local/{{ .Charts.Name }}/config/
+    path: /usr/local/{{ .Chart.Name }}/config/
     filename: connection.yml
   channels: {{ .Values.channels }}
 Kafka:
@@ -64,3 +65,4 @@ Kafka:
   eventListener:
     brokerHost: {{ .Values.Kafka.eventListener.brokerHost }}
     topic: {{ .Values.Kafka.eventListener.topic }}
+{{- end }}
