@@ -21,37 +21,37 @@ spec:
         vault.hashicorp.com/secret-volume-path-vault-intg.properties: "/etc/{{ .Chart.Name }}/secrets"
         vault.hashicorp.com/agent-inject-secret-vault-intg.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
         vault.hashicorp.com/agent-inject-template-vault-intg.properties: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
-          {{ .Data.{{ .Values.vault.integration.key }} }}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service" {{`-}}
+          {{ .Data.`}}{{ .Values.vault.integration.key }} {{`}}
           {{- end }}`}}
         vault.hashicorp.com/secret-volume-path-vault-event.properties: "/etc/{{ .Chart.Name }}/secrets"
         vault.hashicorp.com/agent-inject-secret-vault-event.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
         vault.hashicorp.com/agent-inject-template-vault-event.properties: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
-          {{ .Data.{{ .Values.vault.event.key }} }}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service" {{`-}}
+          {{ .Data.`}}{{ .Values.vault.event.key }} {{`}}
           {{- end }}`}}
         vault.hashicorp.com/secret-volume-path-vault-apikey.properties: "/etc/{{ .Chart.Name }}/secrets"
         vault.hashicorp.com/agent-inject-secret-vault-apikey.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
         vault.hashicorp.com/agent-inject-template-vault-apikey.properties: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
-          {{ .Data.{{ .Values.vault.apikey.key }} }}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service" {{`-}}
+          {{ .Data.`}}{{ .Values.vault.apikey.key }} {{`}}
           {{- end }}`}}
         vault.hashicorp.com/secret-volume-path-admin.id: "/etc/{{ .Chart.Name }}/secrets"
         vault.hashicorp.com/agent-inject-secret-admin.id: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users"
         vault.hashicorp.com/agent-inject-template-admin.id: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users -}}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users" {{`-}}
           {{ .Data.admin }}
           {{- end }}`}}
         vault.hashicorp.com/secret-volume-path-clientUser.id: "/etc/{{ .Chart.Name }}/secrets"
         vault.hashicorp.com/agent-inject-secret-clientUser.id: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users"
         vault.hashicorp.com/agent-inject-template-clientUser.id: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users -}}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users" {{`-}}
           {{ .Data.clientUser }}
           {{- end }}`}}
         vault.hashicorp.com/secret-volume-path-ca.crt: "/etc/{{ .Chart.Name }}/secrets/ca"
         vault.hashicorp.com/agent-inject-secret-ca.crt: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/components"
         vault.hashicorp.com/agent-inject-template-ca.crt: |
-          {{`{{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/components -}}
+          {{`{{- with secret`}} "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/components" {{`-}}
           {{ .Data.ca }}
           {{- end }}`}}
         vault.hashicorp.com/role: {{ .Values.vaultRole | quote }}
@@ -78,9 +78,6 @@ spec:
             items:
               - key: application.yml
                 path: application.yml
-        - name: secrets-volume
-          emptyDir:
-            medium: Memory
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -96,7 +93,5 @@ spec:
               mountPath: /usr/local/{{ .Chart.Name }}/config/
             - name: application-volume
               mountPath: /usr/local/config/
-            - name: secrets-volume
-              mountPath: /etc/{{ .Chart.Name }}/secrets
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

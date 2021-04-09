@@ -63,16 +63,16 @@ resources:
     cpu: 100m
     memory: 1.5Gi
 
-channels: {}
+channels: "1,2"
 
 Kafka:
   integration:
-    brokerHost: {}
-    groupId: {}
-    topic: {}
+    brokerHost: "address"
+    groupId: "groupId"
+    topic: "topic"
   eventListener:
-    brokerHost: {}
-    topic: {}
+    brokerHost: "address"
+    topic: "topic"
 
 vault:
   integration:
@@ -83,15 +83,15 @@ vault:
     key: apikey
 
 Organization:
-  Name: {}
-  MSP: {}
+  Name: "org"
+  MSP: "orgMSP"
   peers:
-    - peerHostName:
-      peerAddress:
+    - peerHostName: "peer.hostname.com"
+      peerAddress: "peer.address.com"
   ca:
-    HostName: {}
-    Address: {}
-    Name: {}
+    HostName: "ca.hostname.com"
+    Address: "ca.address.com"
+    Name: "ca"
 
 Environment: dev
 
