@@ -1,0 +1,35 @@
+name: fabric-network
+version: 1.0.0
+client:
+  organization: {{ .Values.Organization.Name }}
+  connection:
+    timeout:
+      peer:
+        endorser: '300'
+organizations:
+  Walmart:
+    mspid: {{ .Values.Organization.MSP }}
+    peers:
+      {{ range .Values.Organization.peers }}
+      - {{ .peerHostName }}
+      {{ end }}
+    certificateAuthorities:
+      - {{ .Values.Organization.ca.HostName }}
+peers:
+  {{ range .Values.Organization.peers }}
+  {{ .peerHostName }}:
+    url: {{ .peerAddress }}
+    tlsCACerts:
+      path: /etc/{{ .Charts.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
+    grpcOptions:
+      ssl-target-name-override: {{ .peerHostName }}
+      hostnameOverride: {{ .peerHostName }}
+    {{ end }}
+certificateAuthorities:
+  {{ .Values.Organization.ca.HostName }}:
+    url: {{ .Values.Organization.ca.Address }}
+    caName: {{ .Values.Organization.ca.Name }}
+    tlsCACerts:
+      path: /etc/{{ .Charts.Name }}/secrets/{{ .Values.Organization.Name }}/ca/ca.crt
+    httpOptions:
+      verify: false

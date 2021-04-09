@@ -1,66 +1,60 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hlf-rest-client
+  name: {{ .Charts.Name }}
   labels:
-    app: hlf-rest-client
+    app: {{ .Charts.Name }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app: hlf-rest-client
+      app: {{ .Charts.Name }}
   template:
     metadata:
       labels:
-        app: hlf-rest-client
+        app: {{ .Charts.Name }}
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/agent-inject-status: "update"
-      {{- range .Values.connectionProfiles }}
-        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_users.txt: "/usr/local/config/wallet/{{ .networkName}}"
-        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_users.txt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/wallet"
-        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_users.txt: |
-          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/wallet"}}
-          {{ range $key, $value := .Data.data }}
-          {{$key}}|{{$value}}
-          {{end}}
-          {{ end }}`}}
-        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_users.txt: |
-          /bin/sh -c "awk NF /usr/local/config/wallet/{{ .networkName}}/users.txt | while IFS='|' read -r key val
-           do
-             echo $val > /usr/local/config/wallet/{{ .networkName}}/$key
-           done"
-        #mapping Orderer ca certificate from vault to hlf-rest-client
-        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_orderer.crt : "{{ .ordererCAPath }}"
-        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_orderer.crt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/orderer"
-        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_orderer.crt: |
-          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/orderer"}}
-          {{ range $key, $value := .Data.data }}
-          {{$value}}
-          {{end}}
-          {{ end }}`}}
-        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_orderer.crt: |
-          /bin/sh -c "awk NF {{ .ordererCAPath }}/{{ .networkName}}_orderer.crt >  {{ .ordererCAPath }}/ca.crt"
-
-        #mapping Peer ca certificate from vault to hlf-rest-client
-        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_peer.crt : "{{ .peerCAPath }}"
-        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_peer.crt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/peerOrg"
-        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_peer.crt: |
-          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/peerOrg"}}
-          {{ range $key, $value := .Data.data }}
-          {{$value}}
-          {{end}}
-          {{ end }} `}}
-        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_peer.crt: |
-          /bin/sh -c "awk NF {{ .peerCAPath }}/{{ .networkName}}_peer.crt >  {{ .peerCAPath }}/ca.crt"
-
-        {{- end }}
-
-        vault.hashicorp.com/role: {{ .Values.vaultRole | quote}}
-#      labels:
-#        {{- include "hlf-rest-client.selectorLabels" . | nindent 8 }}
+        vault.hashicorp.com/secret-volume-path-vault-intg.properties: "/etc/{{ .Charts.Name }}/secrets"
+        vault.hashicorp.com/agent-inject-secret-vault-intg.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
+        vault.hashicorp.com/agent-inject-template-vault-intg.properties: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
+          {{ .Data.{{ .Values.vault.integration.key }} }}
+          {{- end }}
+        vault.hashicorp.com/secret-volume-path-vault-event.properties: "/etc/{{ .Charts.Name }}/secrets"
+        vault.hashicorp.com/agent-inject-secret-vault-event.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
+        vault.hashicorp.com/agent-inject-template-vault-event.properties: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
+          {{ .Data.{{ .Values.vault.event.key }} }}
+          {{- end }}
+        vault.hashicorp.com/secret-volume-path-vault-apikey.properties: "/etc/{{ .Charts.Name }}/secrets"
+        vault.hashicorp.com/agent-inject-secret-vault-apikey.properties: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service"
+        vault.hashicorp.com/agent-inject-template-vault-apikey.properties: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/service -}}
+          {{ .Data.{{ .Values.vault.apikey.key }} }}
+          {{- end }}
+        vault.hashicorp.com/secret-volume-path-admin.id: "/etc/{{ .Charts.Name }}/secrets"
+        vault.hashicorp.com/agent-inject-secret-admin.id: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users"
+        vault.hashicorp.com/agent-inject-template-admin.id: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users -}}
+          {{ .Data.admin }}
+          {{- end }}
+        vault.hashicorp.com/secret-volume-path-clientUser.id: "/etc/{{ .Charts.Name }}/secrets"
+        vault.hashicorp.com/agent-inject-secret-clientUser.id: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users"
+        vault.hashicorp.com/agent-inject-template-clientUser.id: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/users -}}
+          {{ .Data.clientUser }}
+          {{- end }}
+        vault.hashicorp.com/secret-volume-path-ca.crt: "/etc/{{ .Charts.Name }}/secrets/ca"
+        vault.hashicorp.com/agent-inject-secret-ca.crt: "config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/components"
+        vault.hashicorp.com/agent-inject-template-ca.crt: |
+          {{- with secret config/wbp/platform/{{ .Values.Environment }}/{{ .Values.NetworkName }}/components/hlf-rest/components -}}
+          {{ .Data.ca }}
+          {{- end }}
+        vault.hashicorp.com/role: {{ .Values.vaultRole | quote }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -72,12 +66,21 @@ spec:
       volumes:
         - name: connection-profile-volume
           configMap:
-            name: connection-profile-config
-            defaultMode: 0744
-        - name: config-data
+            name: {{ .Release.Name }}-config
+            defaultMode: 0544
+            items:
+              - key: connection.yml
+                path: connection.yml
+        - name: application-volume
+          configMap:
+            name: {{ .Release.Name }}-config
+            defaultMode: 0544
+            items:
+              - key: application.yml
+                path: application.yml
+        - name: secrets-volume
           emptyDir:
             medium: Memory
-
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -90,44 +93,10 @@ spec:
               protocol: TCP
           volumeMounts:
             - name: connection-profile-volume
+              mountPath: /usr/local/{{ .Charts.Name }}/config/
+            - name: application-volume
               mountPath: /usr/local/config/
-          env:
-          {{- range .Values.env }}
-            - name: {{ .name }}
-              value: {{ .value | quote}}
-          {{- end }}
-#      initContainers:
-#        - name:  setup-config
-#          image: busybox
-#          imagePullPolicy: "IfNotPresent"
-#          command:
-#            - sh
-#            - "-c"
-#            - |
-#              ls /usr/local/config
-#          volumeMounts:
-#            - name: connection-profile-volume
-#              mountPath: /usr/local/config
-
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: http
+            - name: secrets-volume
+              mountPath: /etc/{{ .Charts.Name }}/secrets
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
