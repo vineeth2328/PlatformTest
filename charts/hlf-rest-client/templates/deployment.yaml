@@ -1,24 +1,66 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "hlf-rest-client.fullname" . }}
+  name: hlf-rest-client
   labels:
-    {{- include "hlf-rest-client.labels" . | nindent 4 }}
+    app: hlf-rest-client
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "hlf-rest-client.selectorLabels" . | nindent 6 }}
+      app: hlf-rest-client
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       labels:
-        {{- include "hlf-rest-client.selectorLabels" . | nindent 8 }}
+        app: hlf-rest-client
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/agent-inject-status: "update"
+      {{- range .Values.connectionProfiles }}
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_users.txt: "/usr/local/config/wallet/{{ .networkName}}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_users.txt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/wallet"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_users.txt: |
+          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/wallet"}}
+          {{ range $key, $value := .Data.data }}
+          {{$key}}|{{$value}}
+          {{end}}
+          {{ end }}`}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_users.txt: |
+          /bin/sh -c "awk NF /usr/local/config/wallet/{{ .networkName}}/users.txt | while IFS='|' read -r key val
+           do
+             echo $val > /usr/local/config/wallet/{{ .networkName}}/$key
+           done"
+        #mapping Orderer ca certificate from vault to hlf-rest-client
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_orderer.crt : "{{ .ordererCAPath }}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_orderer.crt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/orderer"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_orderer.crt: |
+          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/orderer"}}
+          {{ range $key, $value := .Data.data }}
+          {{$value}}
+          {{end}}
+          {{ end }}`}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_orderer.crt: |
+          /bin/sh -c "awk NF {{ .ordererCAPath }}/{{ .networkName}}_orderer.crt >  {{ .ordererCAPath }}/ca.crt"
+
+        #mapping Peer ca certificate from vault to hlf-rest-client
+        vault.hashicorp.com/secret-volume-path-{{ .networkName}}_peer.crt : "{{ .peerCAPath }}"
+        vault.hashicorp.com/agent-inject-secret-{{ .networkName}}_peer.crt: "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/peerOrg"
+        vault.hashicorp.com/agent-inject-template-{{ .networkName}}_peer.crt: |
+          {{`{{ with secret "config/wbp/platform/dev/wbp_demo_network/components/hlf-rest/fabric/peerOrg"}}
+          {{ range $key, $value := .Data.data }}
+          {{$value}}
+          {{end}}
+          {{ end }} `}}
+        vault.hashicorp.com/agent-inject-command-{{ .networkName}}_peer.crt: |
+          /bin/sh -c "awk NF {{ .peerCAPath }}/{{ .networkName}}_peer.crt >  {{ .peerCAPath }}/ca.crt"
+
+        {{- end }}
+
+        vault.hashicorp.com/role: {{ .Values.vaultRole | quote}}
+#      labels:
+#        {{- include "hlf-rest-client.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -50,14 +92,10 @@ spec:
             - name: connection-profile-volume
               mountPath: /usr/local/config/
           env:
-            - name: fabric_localhostReportAddress
-              value: "false"
-            - name: fabric_orgConnectionConfig_filename
-              value: connection-walmart.yaml
-            - name: fabric_wallet_clientUser_name
-              value:  clientUser
-            - name: spring_profiles_active
-              value:  container
+          {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote}}
+          {{- end }}
 #      initContainers:
 #        - name:  setup-config
 #          image: busybox
