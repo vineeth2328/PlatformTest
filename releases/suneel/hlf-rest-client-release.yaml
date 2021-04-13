@@ -13,4 +13,4 @@ spec:
     path: charts/hlf-rest-client
     ref: master
   values:
-    replicaCount: 1
+    replicaCount: 2

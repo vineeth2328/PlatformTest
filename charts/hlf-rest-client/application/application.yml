@@ -1,0 +1,66 @@
+spring:
+  profiles.active: k8s
+Kafka:
+  integration:
+    jaasConfigFile: file:/etc/{{ $.Chart.Name }}/secrets/vault-intg.properties
+  eventListener:
+    jaasConfigFile: file:/etc/{{ $.Chart.Name }}/secrets/vault-event.properties
+fabric:
+  client:
+    rest:
+      apikeyFile: file:/etc/{{ $.Chart.Name }}/secrets/vault-apikey.properties
+springdoc:
+  version: 1.0.0
+  swagger-ui:
+    url: /open-api.yml
+  api-docs:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,metrics,health
+
+  endpoint:
+    health:
+      group:
+        db:
+          include: db
+          show-components: always
+
+  metrics:
+    enable:
+      tomcat: true
+      jvm: true
+      process: true
+      hikaricp: true
+      system: true
+      jdbc: true
+      logback: true
+
+---
+
+spring:
+  profiles: k8s
+  devtools.add-properties: false
+fabric:
+  localhostReportAddress: true
+  wallet:
+    path: /etc/{{ $.Chart.Name }}/secrets/
+    adminUser:
+      name: admin
+    clientUser:
+      name: clientUser
+  orgConnectionConfig:
+    path: /usr/local/{{ $.Chart.Name }}/config/
+    filename: connection.yml
+  channels: {{ $.Values.channels }}
+Kafka:
+  integration:
+    brokerHost: {{ $.Values.Kafka.integration.brokerHost }}
+    groupId: {{ $.Values.Kafka.integration.groupId }}
+    topic: {{ $.Values.Kafka.integration.topic }}
+  eventListener:
+    brokerHost: {{ $.Values.Kafka.eventListener.brokerHost }}
+    topic: {{ $.Values.Kafka.eventListener.topic }}

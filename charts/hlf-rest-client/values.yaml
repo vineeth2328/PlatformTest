@@ -4,17 +4,23 @@
 
 replicaCount: 1
 
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
 image:
   repository: karthiksamaganam/hlf-rest-client_fabric-rest-client:v1
   #repository: docker.prod.walmart.com/blockchain/hlf-rest-client:1.0.5
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
-
+vaultRole: hlfapp
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -23,24 +29,6 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: "hlfsa"
-  #podAnnotations: {}
-podAnnotations:
-    vault.hashicorp.com/agent-inject: "true"
-    vault.hashicorp.com/agent-inject-status: "update"
-    vault.hashicorp.com/secret-volume-path-users.txt: "/usr/local/config/wallet"
-    vault.hashicorp.com/agent-inject-secret-users.txt: "config/users"
-    vault.hashicorp.com/agent-inject-template-users.txt: |
-      {{ with secret "config/users"}}
-      {{ range $key, $value := .Data.data }}
-      {{$key}}|{{$value}}
-      {{end}}
-      {{ end }}
-#    vault.hashicorp.com/agent-inject-command-users.txt: |
-#      /bin/sh -c "awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done"
-    vault.hashicorp.com/agent-inject-command-users.txt: {{ ( print "sh -c awk NF /usr/local/config/wallet/users.txt | while IFS="|" read -r key val;do echo $val>$key; done" ) }}
-    vault.hashicorp.com/role: "hlfapp"
-podSecurityContext: {}
-  # fsGroup: 2000
 
 securityContext: {}
   # capabilities:
@@ -67,49 +55,44 @@ ingress:
   #    hosts:
   #      - chart-example.local
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+resources:
+  limits:
+    cpu: 100m
+    memory: 8.5Gi
+  requests:
+    cpu: 100m
+    memory: 1.5Gi
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 100
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
+channels: "1,2"
 
-nodeSelector: {}
+Kafka:
+  integration:
+    brokerHost: "address"
+    groupId: "groupId"
+    topic: "topic"
+  eventListener:
+    brokerHost: "address"
+    topic: "topic"
 
-tolerations: []
+vault:
+  integration:
+    key: integration
+  event:
+    key: event
+  apikey:
+    key: apikey
 
-affinity: {}
+Organization:
+  Name: "org"
+  MSP: "orgMSP"
+  peers:
+    - peerHostName: "peer.hostname.com"
+      peerAddress: "peer.address.com"
+  ca:
+    HostName: "ca.hostname.com"
+    Address: "ca.address.com"
+    Name: "ca"
 
-env:
-  - name: fabric_localhostReportAddress
-    value: "false"
-  - name: fabric_orgConnectionConfig_filename
-    value: connection-walmart.yaml
-  - name: fabric_wallet_clientUser_name
-    value:  clientUser
-  - name: spring_profiles_active
-    value:  container
-#initContainers:
-#  setup-config:
-#    image: busybox
-#    volumeMounts:
-#      - name: connection-profile-volume
-#        mountPath: /usr/local/config/
-#    command:
-#      - sh
-#      - "-c"
-#      - |
-#        ls /usr/local/config
+Environment: dev
 
+NetworkName: wbp-network
