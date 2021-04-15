@@ -1,0 +1,556 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: wbp-platform
+spec:
+  releaseName: grafana
+  chart:
+    git: git@github.com:blockchain-wmt/PlatformTest
+    path: charts/grafana
+    ref: master
+  values:
+    grafana.ini:
+      server:
+        root_url: http://40.74.161.183:80/explorer
+
+    datasources:
+      prometheus.yaml:
+        apiVersion: 1
+        datasources:
+          - access: proxy
+            editable: true
+            name: prometheus
+            orgId: 1
+            type: prometheus
+            url: http://40.74.161.183:80/prometheus"
+            version: 1
+
+    dashboards:
+      default:
+        fabric-dashboard:
+          json: |
+              {
+                "annotations": {
+                  "list": [
+                    {
+                      "builtIn": 1,
+                      "datasource": "-- Grafana --",
+                      "enable": true,
+                      "hide": true,
+                      "iconColor": "rgba(0, 211, 255, 1)",
+                      "name": "Annotations & Alerts",
+                      "type": "dashboard"
+                    }
+                  ]
+                },
+                "editable": true,
+                "gnetId": null,
+                "graphTooltip": 0,
+                "id": 2,
+                "links": [],
+                "panels": [
+                  {
+                    "aliasColors": {},
+                    "bars": false,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "prometheus",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 2,
+                    "fillGradient": 4,
+                    "gridPos": {
+                      "h": 9,
+                      "w": 12,
+                      "x": 0,
+                      "y": 0
+                    },
+                    "hiddenSeries": false,
+                    "id": 2,
+                    "legend": {
+                      "alignAsTable": true,
+                      "avg": false,
+                      "current": false,
+                      "max": false,
+                      "min": false,
+                      "rightSide": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 4,
+                    "nullPointMode": "null",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pluginVersion": "7.3.4",
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": true,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "expr": "ledger_blockchain_height",
+                        "format": "time_series",
+                        "instant": false,
+                        "interval": "",
+                        "legendFormat": "",
+                        "queryType": "randomWalk",
+                        "refId": "A"
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "Blockchain Height",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  },
+                  {
+                    "aliasColors": {},
+                    "bars": true,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "prometheus",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 1,
+                    "fillGradient": 0,
+                    "gridPos": {
+                      "h": 8,
+                      "w": 12,
+                      "x": 12,
+                      "y": 0
+                    },
+                    "hiddenSeries": false,
+                    "id": 6,
+                    "legend": {
+                      "avg": false,
+                      "current": false,
+                      "max": false,
+                      "min": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 3,
+                    "nullPointMode": "null",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pluginVersion": "7.3.4",
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": true,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "expr": "fabric_version",
+                        "interval": "",
+                        "legendFormat": "",
+                        "queryType": "randomWalk",
+                        "refId": "A"
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "Node versions",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  },
+                  {
+                    "aliasColors": {},
+                    "bars": true,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "prometheus",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 1,
+                    "fillGradient": 2,
+                    "gridPos": {
+                      "h": 8,
+                      "w": 12,
+                      "x": 12,
+                      "y": 8
+                    },
+                    "hiddenSeries": false,
+                    "id": 4,
+                    "legend": {
+                      "avg": false,
+                      "current": false,
+                      "hideEmpty": false,
+                      "hideZero": false,
+                      "max": false,
+                      "min": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 1,
+                    "nullPointMode": "null as zero",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pluginVersion": "7.3.4",
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": false,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "expr": "histogram_quantile(0.95, sum(rate(endorser_proposal_duration_bucket[5m])) by (le))",
+                        "interval": "",
+                        "legendFormat": "",
+                        "queryType": "randomWalk",
+                        "refId": "A"
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "Endorsement proposals",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  },
+                  {
+                    "aliasColors": {},
+                    "bars": true,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "prometheus",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 1,
+                    "fillGradient": 0,
+                    "gridPos": {
+                      "h": 8,
+                      "w": 12,
+                      "x": 0,
+                      "y": 9
+                    },
+                    "hiddenSeries": false,
+                    "id": 8,
+                    "legend": {
+                      "avg": false,
+                      "current": false,
+                      "max": false,
+                      "min": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 1,
+                    "nullPointMode": "null",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pluginVersion": "7.3.4",
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": false,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "expr": "gossip_state_height",
+                        "interval": "",
+                        "legendFormat": "",
+                        "queryType": "randomWalk",
+                        "refId": "A"
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "Gossip State Height",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  },
+                  {
+                    "aliasColors": {},
+                    "bars": true,
+                    "dashLength": 10,
+                    "dashes": false,
+                    "datasource": "prometheus",
+                    "fieldConfig": {
+                      "defaults": {
+                        "custom": {}
+                      },
+                      "overrides": []
+                    },
+                    "fill": 1,
+                    "fillGradient": 0,
+                    "gridPos": {
+                      "h": 8,
+                      "w": 12,
+                      "x": 12,
+                      "y": 16
+                    },
+                    "hiddenSeries": false,
+                    "id": 10,
+                    "legend": {
+                      "avg": false,
+                      "current": false,
+                      "max": false,
+                      "min": false,
+                      "show": true,
+                      "total": false,
+                      "values": false
+                    },
+                    "lines": true,
+                    "linewidth": 1,
+                    "nullPointMode": "null",
+                    "options": {
+                      "alertThreshold": true
+                    },
+                    "percentage": false,
+                    "pluginVersion": "7.3.4",
+                    "pointradius": 2,
+                    "points": false,
+                    "renderer": "flot",
+                    "seriesOverrides": [],
+                    "spaceLength": 10,
+                    "stack": true,
+                    "steppedLine": false,
+                    "targets": [
+                      {
+                        "expr": "ledger_block_processing_time_bucket",
+                        "interval": "",
+                        "legendFormat": "",
+                        "queryType": "randomWalk",
+                        "refId": "A"
+                      }
+                    ],
+                    "thresholds": [],
+                    "timeFrom": null,
+                    "timeRegions": [],
+                    "timeShift": null,
+                    "title": "Block Processing Time",
+                    "tooltip": {
+                      "shared": true,
+                      "sort": 0,
+                      "value_type": "individual"
+                    },
+                    "type": "graph",
+                    "xaxis": {
+                      "buckets": null,
+                      "mode": "time",
+                      "name": null,
+                      "show": true,
+                      "values": []
+                    },
+                    "yaxes": [
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      },
+                      {
+                        "format": "short",
+                        "label": null,
+                        "logBase": 1,
+                        "max": null,
+                        "min": null,
+                        "show": true
+                      }
+                    ],
+                    "yaxis": {
+                      "align": false,
+                      "alignLevel": null
+                    }
+                  }
+                ],
+                "refresh": false,
+                "schemaVersion": 26,
+                "style": "dark",
+                "tags": [],
+                "templating": {
+                  "list": []
+                },
+                "time": {
+                  "from": "now-6h",
+                  "to": "now"
+                },
+                "timepicker": {},
+                "timezone": "",
+                "title": "Hyperledger Fabric  Default Dashboard",
+                "uid": "JTRdCn1Gz",
+                "version": 5
+              }
