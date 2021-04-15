@@ -1,0 +1,22 @@
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: prometheus
+  namespace: wbp-platform
+spec:
+  releaseName: prometheus
+  chart:
+    git: git@github.com:blockchain-wmt/PlatformTest
+    path: charts/prometheus
+    ref: master
+  values:
+    server:
+      ingress:
+        customPath: /prometheus
+      prefixURL: "/prometheus"
+      baseURL: "http://40.74.161.183:80/prometheus"
+
+    extraScrapeConfigs: |
+      - job_name: 'peer0'
+        static_configs:
+        - targets: ['peer0.sorg1-net.svc.cluster.local:9441']
